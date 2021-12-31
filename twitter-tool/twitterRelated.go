@@ -51,8 +51,7 @@ func TwitterCredentialsCheck(creds *Credentials) (*twitter.Client, error) {
 	return client, nil
 }
 
-func search(client *twitter.Client, query string) {
-	fmt.Printf("____________searching for %v______________\n", query)
+func search(client *twitter.Client, query string) []tweet {
 	search, _, err := client.Search.Tweets(&twitter.SearchTweetParams{
 		Query:      query,
 		Count:      60,
@@ -62,7 +61,6 @@ func search(client *twitter.Client, query string) {
 	if err != nil {
 		log.Print(err)
 	}
-	//log.Printf("%+v\n", resp)
 	search1 := search.Statuses
 	var search2 []tweet
 	var x tweet
@@ -74,17 +72,32 @@ func search(client *twitter.Client, query string) {
 		x.Entities = t.Entities
 		search2 = append(search2, x)
 	}
-	print(search2)
-	fmt.Println("Search results are stored in 'print.json' file")
+	return search2
 }
-func handleSearch(client *twitter.Client, searchCmd *flag.FlagSet, text *string) {
+func handleSearch(client *twitter.Client, searchCmd *flag.FlagSet, all *bool, text *string) {
 	searchCmd.Parse(os.Args[2:])
-	if *text == "" {
-		fmt.Print("topic is required to search")
+	if *text == "" && !*all {
+		fmt.Print("topic is required to search or specify --all")
 		searchCmd.PrintDefaults()
 		os.Exit(1)
 	} else {
-		search(client, *text)
+		var searchResult []tweet
+		if *all {
+			fmt.Println("____________searching for all added topics______________\n")
+			topics := getTopics()
+			for _, x := range topics {
+				var boundary tweet
+				boundary.Text = "____________________searching for '" + x.Text + "' now____________________"
+				searchResult = append(searchResult, boundary)
+				searchResult = append(searchResult, search(client, x.Text)...)
+			}
+			print(searchResult)
+		} else {
+			fmt.Printf("____________searching for %v______________\n", *text)
+			searchResult = append(searchResult, search(client, *text)...)
+			print(searchResult)
+		}
+		fmt.Println("Search results are stored in 'print.json' file")
 	}
 }
 
@@ -125,32 +138,51 @@ func followers(client *twitter.Client, followersCmd *flag.FlagSet, id *int64) {
 	}
 }
 
-func userTimeline(client *twitter.Client, userTimelineCmd *flag.FlagSet, userTimelineScreenName *string) {
+func userTimeline(client *twitter.Client, userTimelineScreenName *string) []tweet {
+	includeRetweets := false
+	timeline, _, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
+		ScreenName: *userTimelineScreenName,
+		//TrimUser:        flag.Bool("faltu", true, "faltu"),
+		IncludeRetweets: &includeRetweets,
+		Count:           60,
+	})
+	if err != nil {
+		log.Print(err)
+	}
+	var timeline1 []tweet
+	var x tweet
+	for _, t := range timeline {
+		x.ID = t.ID
+		x.Text = t.Text
+		x.CreatedAt = t.CreatedAt
+		x.Entities = t.Entities
+		timeline1 = append(timeline1, x)
+	}
+	return timeline1
+}
+func handleUserTimeline(client *twitter.Client, userTimelineCmd *flag.FlagSet, all *bool, userTimelineScreenName *string) {
 	userTimelineCmd.Parse(os.Args[2:])
-	if *userTimelineScreenName == "" {
-		fmt.Print("Screen Name is required to see the timeline od the user")
+	if *userTimelineScreenName == "" && !*all {
+		fmt.Print("Screen Name is required to see the timeline of the user or specify --all")
 		userTimelineCmd.PrintDefaults()
 		os.Exit(1)
 	} else {
-		timeline, _, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
-			ScreenName: *userTimelineScreenName,
-			//TrimUser:        flag.Bool("faltu", true, "faltu"),
-			IncludeRetweets: flag.Bool("faaltu1", false, "faaltu1"),
-			Count:           60,
-		})
-		if err != nil {
-			log.Print(err)
+		var timelineResult []tweet
+		if *all {
+			fmt.Println("____________searching for all added users______________\n")
+			users := getUsers()
+			for _, x := range users {
+				var boundary tweet
+				boundary.Text = "____________________searching for '@" + x.Screen_Name + "' now____________________"
+				timelineResult = append(timelineResult, boundary)
+				timelineResult = append(timelineResult, userTimeline(client, &x.Screen_Name)...)
+			}
+			print(timelineResult)
+		} else {
+			fmt.Printf("____________searching for @%v______________\n", *userTimelineScreenName)
+			timelineResult = append(timelineResult, userTimeline(client, userTimelineScreenName)...)
+			print(timelineResult)
 		}
-		var timeline1 []tweet
-		var x tweet
-		for _, t := range timeline {
-			x.ID = t.ID
-			x.Text = t.Text
-			x.CreatedAt = t.CreatedAt
-			x.Entities = t.Entities
-			timeline1 = append(timeline1, x)
-		}
-		print(timeline1)
 		fmt.Println("Results are stored in 'print.json' file")
 	}
 }

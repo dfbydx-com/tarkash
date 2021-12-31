@@ -32,11 +32,15 @@ func main() {
 			return
 		}
 
+		//-----------------------
+		// api search --all
+		// api search -topic "bollywood"
 		searchCmd := flag.NewFlagSet("search", flag.ExitOnError)
+		searchAll := searchCmd.Bool("all", false, "search for all added topics?")
 		searchString := searchCmd.String("topic", "", "What to search?")
 		//-----------------------
 
-		// api topics get -all
+		// api topics get -all (search for all added topics in topics.json)
 		// api topics get -topic "bollywood"
 		// api topics add -topic "bollyhwood"
 		// api topics remove -topic "bollywood"
@@ -47,11 +51,15 @@ func main() {
 		topicsGetTopic := topicsGetCmd.String("topic", "", "Which topic you want to see?")
 		topicsAddTopic := topicsAddCmd.String("topic", "", "Which topic to add?")
 		topicsRemoveTopic := topicsRemoveCmd.String("topic", "", "Which topic to remove?")
-
 		//------------------------
+
+		// api usertimeline --all  (timeline for added users in users.json)
+		// api usertimeline -screenName "elonmusk"
 		userTimelineCmd := flag.NewFlagSet("usertimeline", flag.ExitOnError)
+		userTimelineAll := userTimelineCmd.Bool("all", false, "user timeline for all the saved users?")
 		userTimelineScreenName := userTimelineCmd.String("screenName", "", "what is the screen name of the user?")
 		//------------------------
+
 		// api users get -all
 		// api users get -user "elonmusk"
 		// api users add -user "elonmusk"
@@ -63,12 +71,16 @@ func main() {
 		usersGetUser := topicsGetCmd.String("user", "", "Which user you want to see?")
 		usersAddUser := topicsAddCmd.String("user", "", "Which user to add?")
 		usersRemoveUser := topicsRemoveCmd.String("user", "", "Which user to remove?")
-
 		//------------------------
+
+		// api trends
 		flag.NewFlagSet("trends", flag.ExitOnError)
 		//------------------------
+
+		// api followers -id 12 (id of the user)
 		followersCmd := flag.NewFlagSet("followers", flag.ExitOnError)
 		followersId := followersCmd.Int64("id", 0, "What's the user id?")
+		//-------------------------
 
 		if len(os.Args) < 2 {
 			fmt.Println("expected 'search', 'usertimeline', 'topics', 'users', 'trends' or 'followers' subcommands")
@@ -78,9 +90,9 @@ func main() {
 		//look at the 2nd argument's value
 		switch os.Args[1] {
 		case "search":
-			handleSearch(client, searchCmd, searchString)
+			handleSearch(client, searchCmd, searchAll, searchString)
 		case "usertimeline":
-			userTimeline(client, userTimelineCmd, userTimelineScreenName)
+			handleUserTimeline(client, userTimelineCmd, userTimelineAll, userTimelineScreenName)
 		case "topics":
 			if len(os.Args) < 3 {
 				fmt.Println("expected 'get', 'add' or 'remove' subcommands after topics")
@@ -106,7 +118,7 @@ func main() {
 			} else if os.Args[2] == "remove" {
 				handleRemoveUser(usersRemoveCmd, usersRemoveUser)
 			} else {
-				fmt.Println("expected 'get', 'add' or 'remove' subcommands after topics")
+				fmt.Println("expected 'get', 'add' or 'remove' subcommands after users")
 				os.Exit(1)
 			}
 		case "trends":
