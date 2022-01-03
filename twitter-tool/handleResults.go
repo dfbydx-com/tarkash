@@ -78,7 +78,7 @@ func handleGetTopic(topicsGetCmd *flag.FlagSet, topicsGetAll *bool, topicsGetTop
 	topicsGetCmd.Parse(os.Args[3:])
 	if !*topicsGetAll && *topicsGetTopic == "" {
 		fmt.Print("topic is required or specify --all to get all the videos")
-		topicsGetCmd.PrintDefaults()
+		// topicsGetCmd.PrintDefaults()
 		os.Exit(1)
 	}
 	if *topicsGetAll {
@@ -108,7 +108,7 @@ func handleAddTopic(topicsAddCmd *flag.FlagSet, topicsAddTopic *string) {
 	topicsAddCmd.Parse(os.Args[3:])
 	if *topicsAddTopic == "" {
 		fmt.Print("-topic is required to add it")
-		topicsAddCmd.PrintDefaults()
+		// topicsAddCmd.PrintDefaults()
 		os.Exit(1)
 	}
 	t := topic{

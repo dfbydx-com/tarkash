@@ -21,14 +21,14 @@ type tweet struct {
 	Entities  *twitter.Entities
 }
 
-type Credentials struct {
-	ConsumerKey       string //api key
-	ConsumerSecret    string //api secret
-	AccessToken       string
-	AccessTokenSecret string
-}
+// type Credentials struct {
+// 	ConsumerKey       string //api key
+// 	ConsumerSecret    string //api secret
+// 	AccessToken       string
+// 	AccessTokenSecret string
+// }
 
-func TwitterCredentialsCheck(creds *Credentials) (*twitter.Client, error) {
+func TwitterCredentialsCheck(creds *Configuration) (*twitter.Client, error) {
 	config := oauth1.NewConfig(creds.ConsumerKey, creds.ConsumerSecret)
 	token := oauth1.NewToken(creds.AccessToken, creds.AccessTokenSecret)
 
@@ -46,7 +46,6 @@ func TwitterCredentialsCheck(creds *Credentials) (*twitter.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("got the twitter client...")
 	//log.Printf("User's ACCOUNT:\n%+v\n", user)
 	return client, nil
 }
@@ -57,6 +56,7 @@ func search(client *twitter.Client, query string) []tweet {
 		Count:      60,
 		ResultType: "popular",
 		Since:      time.Now().AddDate(0, -1, 0).Format("2006-01-02"),
+		TweetMode:  "extended",
 	})
 	if err != nil {
 		log.Print(err)
@@ -66,7 +66,7 @@ func search(client *twitter.Client, query string) []tweet {
 	var x tweet
 	for _, t := range search1 {
 		x.ID = t.ID
-		x.Text = t.Text
+		x.Text = t.FullText
 		//x.User = t.User
 		x.CreatedAt = t.CreatedAt
 		x.Entities = t.Entities
@@ -145,6 +145,7 @@ func userTimeline(client *twitter.Client, userTimelineScreenName *string) []twee
 		//TrimUser:        flag.Bool("faltu", true, "faltu"),
 		IncludeRetweets: &includeRetweets,
 		Count:           60,
+		TweetMode:       "extended",
 	})
 	if err != nil {
 		log.Print(err)
@@ -153,7 +154,7 @@ func userTimeline(client *twitter.Client, userTimelineScreenName *string) []twee
 	var x tweet
 	for _, t := range timeline {
 		x.ID = t.ID
-		x.Text = t.Text
+		x.Text = t.FullText
 		x.CreatedAt = t.CreatedAt
 		x.Entities = t.Entities
 		timeline1 = append(timeline1, x)
