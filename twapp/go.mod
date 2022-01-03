@@ -1,4 +1,4 @@
-module api
+module twapp
 
 go 1.17
 
