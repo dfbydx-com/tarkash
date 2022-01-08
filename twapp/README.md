@@ -18,7 +18,7 @@ $ cd twapp
 
 # Understanding files
 ## twapp.exe
-We have `twapp.exe` file which we can make by running
+We need `twapp.exe` file to run the commands which we can build by running
 ```
 $ go build
 ```
