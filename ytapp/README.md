@@ -13,6 +13,11 @@ $ cd ytapp
 ```
 
 # Understanding files
+## ytapp.exe
+We need `ytapp.exe` file to run the commands.which we can make by running
+```
+$ go build
+```
 ## print.json
 Everytime we call the apis and get the results from youtube, we save the usefull parts of result in `print.json` file. It's better way in case we want other formats.
 ## config.json
