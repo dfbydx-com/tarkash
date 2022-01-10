@@ -1,8 +1,2 @@
-# HACKS-TOOLS
-social media tools and other hacks
-
-1. twapp
-2. ytapp
-3. linkapp
-
-We are still working on ytapp and linkapp.
+# Tarkash
+Tarkash(Quiver in english) contains tools to help in daily tasks such as to manage social media accounts etc.
